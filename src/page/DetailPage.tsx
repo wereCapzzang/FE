@@ -1,9 +1,11 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Waiting from '../components/detail/Waiting';
 import Heatmap from '../components/detail/Heatmap';
 import Chart from '../components/detail/Chart';
 import { useParams } from 'react-router-dom';
 import useGetRestaurant from '../hooks/useGetRestaurant';
+
+type CrowdedStatus = '혼잡' | '보통' | '여유';
 
 const DetailPage = () => {
   const navigate = useNavigate();
@@ -11,10 +13,18 @@ const DetailPage = () => {
   const restaurantId = parseInt(id || '', 10);
   const { restaurant, loading, error } = useGetRestaurant(restaurantId);
 
+  const location = useLocation();
   //TODO: maxPeople 저장 후 파람으로 넘기기 List클릭시
-  const maxPeople = 200;
-  const congestion = '혼잡';
-  const waitTime = 20;
+  const queryParams = new URLSearchParams(location.search);
+  const congestionParam = queryParams.get('congestion');
+  const congestion: CrowdedStatus =
+    congestionParam === '혼잡' ||
+    congestionParam === '보통' ||
+    congestionParam === '여유'
+      ? congestionParam
+      : '보통';
+  const maxPeople = Number(queryParams.get('maxPeople') || 0);
+  const waitTime = 200;
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>{String(error)}</div>;
@@ -52,8 +62,8 @@ const DetailPage = () => {
           걸려요
         </p>
         <p className="text-sm text-stone-400">
-          이 가게의 12시의 평균 대기 시간은{' '}
-          <span className="text-red-600">20분</span>이에요
+          이 식당의 12의 평균 대기 시간은
+          <span className="text-red-600"> 20분</span>이에요
         </p>
       </div>
     </div>

@@ -1,29 +1,3 @@
-const mockRestaurantDetail = {
-  name: '학생회관 식당',
-  startAt: '10:00',
-  endAt: '20:00',
-  breakStartAt: '14:00',
-  breakEndAt: '15:00',
-  crowed: [
-    {
-      hour: 12,
-      category: '혼잡',
-    },
-    {
-      hour: 13,
-      category: '혼잡',
-    },
-    {
-      hour: 14,
-      category: '보통',
-    },
-    {
-      hour: 15,
-      category: '여유',
-    },
-  ],
-};
-
 type CrowdedStatus = '혼잡' | '보통' | '여유';
 
 interface WaitingProps {

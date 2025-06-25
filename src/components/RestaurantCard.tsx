@@ -1,4 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import type { RestaurantInfo } from '../type';
+import { useEffect, useState } from 'react';
+import baseApi from '../api/base';
 
 interface RestaurantCardProps {
   restaurant: RestaurantInfo;
@@ -16,9 +19,26 @@ const mockRestaurant = {
 };
 
 const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
+  const alarmArray: number[] = JSON.parse(
+    localStorage.getItem('alarm') || '[]'
+  );
+
+  const [isAlarm, setIsAlarm] = useState<boolean>(
+    alarmArray.includes(restaurant.id)
+  );
   // TODO: 혼잡도 계산 로직을 여기에
   type CrowdedStatus = '혼잡' | '보통' | '여유';
   const crowded: CrowdedStatus = '여유';
+  const navigate = useNavigate();
+
+  const handleClickConfusion = () => {
+    const query = new URLSearchParams({
+      congestion: restaurant.congestion,
+      maxPeople: String(restaurant.maxPeople),
+    }).toString();
+
+    navigate(`/${restaurant.id}?${query}`);
+  };
 
   const statusColorMap: Record<CrowdedStatus, string> = {
     혼잡: 'text-[#ff4848] border-[#ff4848]',
@@ -26,7 +46,72 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
     보통: 'text-[#ffb02e] border-[#ffb02e]',
   };
 
-  const isAlarm = false;
+  /**
+   * 알람을 설정한다.
+   * @param restaurantId
+   * @returns
+   */
+  const postAlarm = async (restaurantId: number) => {
+    try {
+      const response = await baseApi.post(`/api/pins/${restaurantId}`, {
+        headers: {
+          Cookie: `${document.cookie}`,
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      alert('알람 요청 중 오류 발생');
+    }
+  };
+
+  /**
+   * 알람을 해제한다.
+   * @param restaurantId
+   * @returns
+   */
+  const deleteAlarm = async (restaurantId: number) => {
+    try {
+      const response = await baseApi.delete(`/api/pins/${restaurantId}`, {
+        headers: {
+          Cookie: `${document.cookie}`,
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      alert('알람 해제 중 오류 발생');
+    }
+  };
+
+  /**
+   * 알람 바뀔 때마다 요청을 보낸다.
+   */
+  useEffect(() => {
+    if (isAlarm) {
+      postAlarm(restaurant.id);
+
+      /**
+       * 브라우저에서 삭제
+       */
+      const prev = JSON.parse(localStorage.getItem('alarm') || '[]');
+      const newAlarmArray = [...prev, restaurant.id];
+      localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
+    } else {
+      deleteAlarm(restaurant.id);
+
+      /**
+       * 브라우저에 저장
+       */
+      const prev = JSON.parse(localStorage.getItem('alarm') || '[]');
+      const newAlarmArray = prev.filter(
+        (prev: number) => prev !== restaurant.id
+      );
+      localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
+    }
+  }, [isAlarm]);
+
+  const handleClickAlarm = () => {
+    setIsAlarm(!isAlarm);
+  };
 
   return (
     <div className="flex flex-col p-4 rounded-xl border border-stone-200">
@@ -41,11 +126,11 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             {crowded}
           </button>
         </div>
-        <button className="">
+        <button onClick={handleClickAlarm} className="">
           {isAlarm ? (
-            <img src="/bell-green.svg" className="w-5 h-5" />
+            <img src="/bell-green.svg" className="w-5 h-5 cursor-pointer" />
           ) : (
-            <img src="/bell-grey.svg" className="w-5 h-5" />
+            <img src="/bell-grey.svg" className="w-5 h-5 cursor-pointer" />
           )}
         </button>
       </div>
@@ -70,7 +155,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           </span>
         </div>
 
-        <button className="flex justify-center items-center bg-green-600 text-white text-sm px-3 py-1 rounded rounded-lg">
+        <button
+          onClick={handleClickConfusion}
+          className="flex justify-center cursor-pointer items-center bg-green-600 text-white text-sm px-3 py-1 rounded rounded-lg"
+        >
           혼잡도 보기
         </button>
       </div>

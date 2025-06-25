@@ -1,4 +1,4 @@
-const Heatmap = () => {
+const Heatmap = ({}) => {
   //TODO 좌석 이미지 제공
   return (
     <div className="flex flex-col px-3 mt-5">

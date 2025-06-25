@@ -2,14 +2,51 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import RestaurantList from '../components/RestaurantList';
 import useGetRestaurantList from '../hooks/useGetRestaurantList';
+import usePin from '../hooks/usePin';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 function HomePage() {
-  const { restaurants, error, loading } = useGetRestaurantList();
+  const {
+    restaurants,
+    error: restaurantError,
+    loading: restaurantLoading,
+  } = useGetRestaurantList();
+
+  const { data: pins, isLoading, isError, error } = usePin();
+
+  useEffect(() => {
+    const pinIds: number[] = JSON.parse(localStorage.getItem('alarm') || '[]');
+
+    if (pins?.restaurants && pinIds) {
+      const toastPinIds = pinIds.filter((id) => pins.restaurants.includes(id));
+
+      const pinnedRestaurants = restaurants?.filter((restaurant) => {
+        toastPinIds.includes(restaurant.id);
+      });
+
+      if (pinnedRestaurants) {
+        for (const x of pinnedRestaurants) {
+          toast(`📢 ${x.name} 식당이 여유로워졌습니다.`, {
+            position: 'top-center',
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            theme: 'light',
+          });
+        }
+      }
+    }
+  }, [pins]);
 
   const navigate = useNavigate();
-  if (loading) return <div>로딩 중...</div>;
-  if (error) return <div>{String(error)}</div>;
+
+  if (restaurantLoading) return <div>로딩 중...</div>;
+  if (restaurantError) return <div>{String(error)}</div>;
   if (!restaurants) return <div>레스토랑 리스트 없음</div>;
+
+  if (isLoading) return <div>핀 목록 불러오는 중 ...</div>;
+  if (isError) return <div>에러: {error.message}</div>;
 
   let splitRestaurants = [];
   for (let i = 0; i < 3; i++) {
@@ -34,8 +71,6 @@ function HomePage() {
     여유: 'text-[#95ca14] border-[#95ca14]',
     보통: 'text-[#ffb02e] border-[#ffb02e]',
   };
-
-  const isAlarm = false;
 
   return (
     <div className="max-w-screen-sm min-h-screen flex flex-col">
