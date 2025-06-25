@@ -1,10 +1,28 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import baseApi from '../api/base';
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
+
   const handleClickButton = () => {
-    navigate('/');
+    navigate('/main');
   };
+
+  const getToken = async () => {
+    try {
+      const response = await baseApi.get(`/api/get-token`);
+
+      localStorage.setItem('token', JSON.stringify(response.data));
+      return response.data;
+    } catch (error: any) {
+      alert('알람 해제 중 오류 발생');
+    }
+  };
+
+  useEffect(() => {
+    getToken();
+  }, []);
 
   return (
     <div className="max-w-screen-sm  gap-10 flex-col min-h-screen items-center justify-center flex flex-col">

@@ -1,17 +1,23 @@
 type CrowdedStatus = '혼잡' | '보통' | '여유';
 
 interface WaitingProps {
-  maxPeople: number;
+  waitingPeople: number;
   congestion: CrowdedStatus;
   waitTime: number;
 }
 
-const Waiting = ({ maxPeople, congestion, waitTime }: WaitingProps) => {
+const Waiting = ({ waitingPeople, congestion, waitTime }: WaitingProps) => {
   const statusColorMap: Record<CrowdedStatus, string> = {
     혼잡: 'text-[#ff4848]',
     여유: 'text-[#95ca14]',
     보통: 'text-[#ffb02e]',
   };
+
+  //   const bgColorMap: Record<CrowdedStatus, string> = {
+  //     혼잡: 'bg-[#fff4f3]',
+  //     여유: 'bg-[#95ca14]',
+  //     보통: 'bg-[#ffb02e]',
+  //   };
 
   const renderImageByCongestion = (congestion: CrowdedStatus) => {
     switch (congestion) {
@@ -56,7 +62,7 @@ const Waiting = ({ maxPeople, congestion, waitTime }: WaitingProps) => {
         </div>
         <div className="flex-1">
           <p className="text-stone-400 mb-1">현재 대기 인원</p>
-          <p className="font-bold text-black">{maxPeople}명</p>
+          <p className="font-bold text-black">{waitingPeople}명</p>
         </div>
       </div>
     </div>

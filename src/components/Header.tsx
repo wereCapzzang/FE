@@ -31,18 +31,18 @@ const Header = () => {
         >
           {phrases[index].includes('밥톨') ? (
             <>
-              배고플 땐{' '}
-              <span className="text-green-600 animate-bounce">밥톨</span>
+              배고플 땐
+              <span className="text-green-600 animate-bounce"> 밥톨</span>
             </>
           ) : (
             <>
-              세종대{' '}
-              <span className="text-green-600 font-semibold">웨이팅 없는</span>{' '}
-              맛집 찾기
+              배고픈 세종대 학생들을 <br />
+              위한,
+              <span className="text-green-600 font-semibold">밥톨</span>
             </>
           )}
         </h2>
-        <img src="/rice.svg" alt="logo" className="w-20 h-20" />
+        <img src="/rice.svg" alt="logo" className="w-25 h-25" />
       </div>
     </>
   );

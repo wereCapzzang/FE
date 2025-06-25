@@ -7,8 +7,9 @@ import OnboardingPage from '../page/OnboardingPage';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: <OnboardingPage />,
   },
+
   {
     path: '/:id',
     element: <DetailPage />,
@@ -18,7 +19,7 @@ export const router = createBrowserRouter([
     element: <RestaurantListPage />,
   },
   {
-    path: '/onboarding',
-    element: <OnboardingPage />,
+    path: '/main',
+    element: <HomePage />,
   },
 ]);

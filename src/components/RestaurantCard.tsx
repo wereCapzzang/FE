@@ -1,22 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import type { RestaurantInfo } from '../type';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import baseApi from '../api/base';
 
 interface RestaurantCardProps {
   restaurant: RestaurantInfo;
 }
-
-const mockRestaurant = {
-  id: 1,
-  name: '학생회관 식당',
-  startAt: '10:00',
-  endAt: '20:00',
-  breakStartAt: '14:00',
-  breakEndAt: '15:00',
-  maxPeople: '200',
-  congenstion: '여유',
-};
 
 const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
   const alarmArray: number[] = JSON.parse(
@@ -28,16 +17,17 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
   );
   // TODO: 혼잡도 계산 로직을 여기에
   type CrowdedStatus = '혼잡' | '보통' | '여유';
-  const crowded: CrowdedStatus = '여유';
   const navigate = useNavigate();
 
   const handleClickConfusion = () => {
     const query = new URLSearchParams({
+      id: String(restaurant.id),
       congestion: restaurant.congestion,
       maxPeople: String(restaurant.maxPeople),
+      waitingPeople: String(restaurant.waitingPeople),
     }).toString();
 
-    navigate(`/${restaurant.id}?${query}`);
+    navigate(`/detail?${query}`);
   };
 
   const statusColorMap: Record<CrowdedStatus, string> = {
@@ -53,11 +43,9 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
    */
   const postAlarm = async (restaurantId: number) => {
     try {
-      const response = await baseApi.post(`/api/pins/${restaurantId}`, {
-        headers: {
-          Cookie: `${document.cookie}`,
-        },
-      });
+      const token = JSON.parse(localStorage.getItem('token') || '');
+
+      const response = await baseApi.post(`/api/pins/${restaurantId}/${token}`);
       return response.data;
     } catch (error: any) {
       alert('알람 요청 중 오류 발생');
@@ -71,11 +59,11 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
    */
   const deleteAlarm = async (restaurantId: number) => {
     try {
-      const response = await baseApi.delete(`/api/pins/${restaurantId}`, {
-        headers: {
-          Cookie: `${document.cookie}`,
-        },
-      });
+      const token = JSON.parse(localStorage.getItem('token') || '');
+
+      const response = await baseApi.delete(
+        `/api/pins/${restaurantId}/${token}`
+      );
       return response.data;
     } catch (error: any) {
       alert('알람 해제 중 오류 발생');
@@ -85,33 +73,53 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
   /**
    * 알람 바뀔 때마다 요청을 보낸다.
    */
-  useEffect(() => {
-    if (isAlarm) {
-      postAlarm(restaurant.id);
+  // useEffect(() => {
+  //   if (isAlarm) {
+  //     postAlarm(restaurant.id);
 
-      /**
-       * 브라우저에서 삭제
-       */
-      const prev = JSON.parse(localStorage.getItem('alarm') || '[]');
-      const newAlarmArray = [...prev, restaurant.id];
-      localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
-    } else {
+  //     /**
+  //      * 브라우저에서 삭제
+  //      */
+  //     const prev = JSON.parse(localStorage.getItem('alarm') || '[]');
+  //     const newAlarmArray = [...prev, restaurant.id];
+  //     localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
+  //   } else {
+  //     deleteAlarm(restaurant.id);
+
+  //     /**
+  //      * 브라우저에 저장
+  //      */
+  //     const prev = JSON.parse(localStorage.getItem('alarm') || '[]');
+  //     const newAlarmArray = prev.filter(
+  //       (prev: number) => prev !== restaurant.id
+  //     );
+  //     localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
+  //   }
+  // }, [isAlarm]);
+
+  const handleClickAlarm = (id: number) => {
+    setIsAlarm(!isAlarm);
+
+    const alarmIds: number[] = JSON.parse(
+      localStorage.getItem('alarm') || '[]'
+    );
+
+    if (alarmIds.includes(id)) {
+      // 이미 알람이 설정되어 있으면 해제
       deleteAlarm(restaurant.id);
-
-      /**
-       * 브라우저에 저장
-       */
-      const prev = JSON.parse(localStorage.getItem('alarm') || '[]');
-      const newAlarmArray = prev.filter(
-        (prev: number) => prev !== restaurant.id
+      const newAlarmArray = alarmIds.filter(
+        (alarmId: number) => alarmId !== id
       );
       localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
+    } else {
+      // 알람이 설정되어 있지 않으면 추가
+      postAlarm(restaurant.id);
+      const newAlarmArray = [...alarmIds, id];
+      localStorage.setItem('alarm', JSON.stringify(newAlarmArray));
     }
-  }, [isAlarm]);
-
-  const handleClickAlarm = () => {
-    setIsAlarm(!isAlarm);
   };
+
+  const waitingTime = restaurant.congestion === '혼잡' ? 6 : 0;
 
   return (
     <div className="flex flex-col p-4 rounded-xl border border-stone-200">
@@ -123,10 +131,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
               statusColorMap[restaurant.congestion]
             }`}
           >
-            {crowded}
+            {restaurant.congestion}
           </button>
         </div>
-        <button onClick={handleClickAlarm} className="">
+        <button onClick={() => handleClickAlarm(restaurant.id)} className="">
           {isAlarm ? (
             <img src="/bell-green.svg" className="w-5 h-5 cursor-pointer" />
           ) : (
@@ -140,7 +148,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             statusColorMap[restaurant.congestion]
           }`}
         >
-          23
+          {waitingTime}
           <span className={` text-sm ${statusColorMap[restaurant.congestion]}`}>
             분 대기
           </span>
@@ -151,7 +159,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
         <div className="flex gap-2 items-center">
           <img src="/people.svg" className="w-5 h-5" />
           <span className="text-sm text-stone-400">
-            {mockRestaurant.maxPeople}
+            {restaurant.waitingPeople}
           </span>
         </div>
 

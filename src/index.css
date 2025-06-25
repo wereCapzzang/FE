@@ -12,6 +12,11 @@
   --color-red-200: #fff4f3;
   --color-yellow-600: #ffb02e;
   --color-yellow-200: #fccb22;
+  --color-blue-100: #9ed9bb;
+  --color-blue-200: #d3eece;
+  --color-blue-300: #f5f5f5;
+  --color-blue-400: #0961a1;
+  --color-red-300: #e74925;
 }
 
 @media (prefers-color-scheme: light) {

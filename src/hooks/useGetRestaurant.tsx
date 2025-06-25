@@ -12,7 +12,8 @@ const useGetRestaurant = (id: number) => {
       setLoading(true);
       setError(null);
 
-      const response = await baseApi.get(`/api/restaurant/${id}`);
+      console.log(document.cookie);
+      const response = await baseApi.get(`/api/restaurants/${id}`);
 
       setRestaurant(response.data);
 

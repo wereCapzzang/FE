@@ -15,7 +15,7 @@ const RestaurantListPage = () => {
     <div className="max-w-screen-sm min-h-screen flex flex-col">
       <header className="w-full p-4 h-10 flex gap-3 items-center">
         <div
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/main')}
           className="cursor-pointer flex gap-3"
         >
           <img src="/rice.png" alt="logo" className="w-6 h-6" />
@@ -29,18 +29,6 @@ const RestaurantListPage = () => {
         </h2>
       </div>
 
-      {/**태그 */}
-      <div className="px-3 flex gap-3">
-        <button className="active:bg-black rounded-full active:text-white text-stone-500 border  border-stone-400 text-sm px-4 py-1">
-          전체
-        </button>
-        <button className="active:bg-black rounded-full active:text-white text-stone-500 border  border-stone-400 text-sm px-4 py-1">
-          여유
-        </button>
-        <button className="active:bg-black rounded-full active:text-white text-stone-500 border  border-stone-400 text-sm px-4 py-1">
-          20분 이내
-        </button>
-      </div>
       <div className="flex flex-col gap-3 p-3">
         {Array.isArray(restaurants) &&
           restaurants.map((restaurant) => (

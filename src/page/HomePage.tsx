@@ -5,6 +5,7 @@ import useGetRestaurantList from '../hooks/useGetRestaurantList';
 import usePin from '../hooks/usePin';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import type { RestaurantInfo } from '../type';
 
 function HomePage() {
   const {
@@ -14,20 +15,28 @@ function HomePage() {
   } = useGetRestaurantList();
 
   const { data: pins, isLoading, isError, error } = usePin();
+  const pinIds: number[] = JSON.parse(localStorage.getItem('alarm') || '[]');
 
   useEffect(() => {
-    const pinIds: number[] = JSON.parse(localStorage.getItem('alarm') || '[]');
-
     if (pins?.restaurants && pinIds) {
-      const toastPinIds = pinIds.filter((id) => pins.restaurants.includes(id));
+      const toastPinIds = pinIds.filter((pinId) =>
+        pins.restaurants.includes(pinId)
+      );
 
-      const pinnedRestaurants = restaurants?.filter((restaurant) => {
-        toastPinIds.includes(restaurant.id);
-      });
+      const pinnedRestaurants = restaurants?.filter((restaurant) =>
+        toastPinIds.includes(restaurant.id)
+      );
+
+      console.log('pinnedRestaurants', pinnedRestaurants);
+      console.log('pinIds', pinIds);
+
+      console.log('toastPinIds', toastPinIds);
+      console.log('pins', pins);
 
       if (pinnedRestaurants) {
         for (const x of pinnedRestaurants) {
-          toast(`📢 ${x.name} 식당이 여유로워졌습니다.`, {
+          alert(`📢 ${x.name} 식당이 여유로워졌습니다.`);
+          toast.info(`📢 ${x.name} 식당이 여유로워졌습니다.`, {
             position: 'top-center',
             autoClose: 3000,
             hideProgressBar: true,
@@ -37,7 +46,7 @@ function HomePage() {
         }
       }
     }
-  }, [pins]);
+  }, [pins, pinIds]);
 
   const navigate = useNavigate();
 
@@ -72,15 +81,24 @@ function HomePage() {
     보통: 'text-[#ffb02e] border-[#ffb02e]',
   };
 
+  const handleClickConfusion = (restaurant: RestaurantInfo) => {
+    const query = new URLSearchParams({
+      id: String(restaurant.id),
+      congestion: restaurant.congestion,
+      maxPeople: String(restaurant.maxPeople),
+      waitingPeople: String(restaurant.waitingPeople),
+    }).toString();
+
+    navigate(`/detail?${query}`);
+  };
+
   return (
     <div className="max-w-screen-sm min-h-screen flex flex-col">
       <div className="h-50 w-full bg-green-200 rounded-b-xl flex flex-col items-center">
         <Header />
       </div>
-      <div className="flex justify-between p-4">
-        <h2 className="font-semibold text-lg">
-          교내 식당 <span className="text-green-600">혼잡도 </span>
-        </h2>
+      <div className="flex justify-between  items-center p-4">
+        <p className="text-[#ACACAC] font-semibold text-sm">2025-06-26 rainy</p>
 
         <button
           onClick={handleClickMore}
@@ -90,21 +108,13 @@ function HomePage() {
         </button>
       </div>
 
+      <h2 className="font-semibold text-lg px-4">
+        교내 식당 <span className="text-green-600">혼잡도 </span>
+      </h2>
       {/**태그 */}
-      <div className="px-3 flex gap-3">
-        <button className="active:bg-black rounded-full active:text-white text-stone-500 border  border-stone-400 text-sm px-4 py-1">
-          전체
-        </button>
-        <button className="active:bg-black rounded-full active:text-white text-stone-500 border  border-stone-400 text-sm px-4 py-1">
-          여유
-        </button>
-        <button className="active:bg-black rounded-full active:text-white text-stone-500 border  border-stone-400 text-sm px-4 py-1">
-          20분 이내
-        </button>
-      </div>
 
       {/* TODO: 3개만 보이게 */}
-      <RestaurantList restaurants={splitRestaurants} />
+      {splitRestaurants && <RestaurantList restaurants={splitRestaurants} />}
 
       <div className="p-4">
         <h2 className="font-semibold text-lg mb-3">
@@ -120,10 +130,16 @@ function HomePage() {
 
                 <div className="flex gap-2">
                   <h2
-                    className={`text-lg font-semibold ${statusColorMap['보통']}`}
+                    className={`text-lg font-semibold ${
+                      statusColorMap[restaurant.congestion]
+                    }`}
                   >
-                    23
-                    <span className={` text-sm ${statusColorMap['보통']}`}>
+                    {restaurant.congestion === '혼잡' ? 6 : 0}
+                    <span
+                      className={` text-sm ${
+                        statusColorMap[restaurant.congestion]
+                      }`}
+                    >
                       분 대기
                     </span>
                   </h2>
@@ -133,13 +149,18 @@ function HomePage() {
                   <div className="flex flex-col gap-5">
                     <div className="flex gap-2 items-center ">
                       <img src="/people.svg" className="w-5 h-5" />
-                      <span className="text-sm text-stone-500">200</span>
+                      <span className="text-sm text-stone-500">
+                        {restaurant.waitingPeople}
+                      </span>
                     </div>
 
                     <div className="text-sm text-stone-500">
                       {restaurant.startAt + '~ ' + restaurant.endAt}
                     </div>
-                    <button className="flex justify-center items-center bg-black text-white text-sm px-3 py-1 rounded rounded-lg">
+                    <button
+                      onClick={() => handleClickConfusion(restaurant)}
+                      className="flex justify-center items-center bg-black text-white text-sm px-3 py-1 rounded rounded-lg"
+                    >
                       혼잡도 보기
                     </button>
                   </div>
