@@ -1,10 +1,8 @@
-import RestaurantCard from './restaurantCard';
+// import RestaurantCard from './restaurantCard';
 
 const RestaurantList = () => {
   return (
-    <div className="flex flex-col gap-3 p-3">
-      <RestaurantCard />
-    </div>
+    <div className="flex flex-col gap-3 p-3">{/* <RestaurantCard /> */}</div>
   );
 };
 
