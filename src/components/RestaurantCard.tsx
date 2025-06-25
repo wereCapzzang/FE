@@ -32,9 +32,11 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
     <div className="flex flex-col p-4 rounded-xl border border-stone-200">
       <div className="flex flex-row justify-between gap-3">
         <div className="flex gap-2">
-          <h2 className="font-semibold">{mockRestaurant.name}</h2>
+          <h2 className="font-semibold">{restaurant?.name || '이름 없음'}</h2>
           <button
-            className={`text-xs border rounded-sm px-2 py-0.5 ${statusColorMap[crowded]}`}
+            className={`text-xs border rounded-sm px-2 py-0.5 ${
+              statusColorMap[restaurant.congestion]
+            }`}
           >
             {crowded}
           </button>
@@ -48,9 +50,15 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
         </button>
       </div>
       <div className="flex gap-2">
-        <h2 className={`text-lg font-semibold ${statusColorMap[crowded]}`}>
-          23{' '}
-          <span className={` text-sm ${statusColorMap[crowded]}`}>분 대기</span>
+        <h2
+          className={`text-lg font-semibold ${
+            statusColorMap[restaurant.congestion]
+          }`}
+        >
+          23
+          <span className={` text-sm ${statusColorMap[restaurant.congestion]}`}>
+            분 대기
+          </span>
         </h2>
       </div>
 
@@ -62,8 +70,8 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           </span>
         </div>
 
-        <button className="flex justify-center items-center bg-black text-white text-sm px-3 py-1 rounded rounded-lg">
-          혼잡도 보러 가기
+        <button className="flex justify-center items-center bg-green-600 text-white text-sm px-3 py-1 rounded rounded-lg">
+          혼잡도 보기
         </button>
       </div>
 

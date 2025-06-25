@@ -24,13 +24,15 @@ const mockRestaurantDetail = {
   ],
 };
 
-const Waiting = () => {
-  type CrowdedStatus = '혼잡' | '보통' | '여유';
-  const maxPeople = 200;
-  const congestion = '혼잡';
-  const waitTime = 30;
-  const crowded: CrowdedStatus = congestion as CrowdedStatus;
+type CrowdedStatus = '혼잡' | '보통' | '여유';
 
+interface WaitingProps {
+  maxPeople: number;
+  congestion: CrowdedStatus;
+  waitTime: number;
+}
+
+const Waiting = ({ maxPeople, congestion, waitTime }: WaitingProps) => {
   const statusColorMap: Record<CrowdedStatus, string> = {
     혼잡: 'text-[#ff4848]',
     여유: 'text-[#95ca14]',
@@ -62,7 +64,7 @@ const Waiting = () => {
       {/* 캐릭터 이미지 */}
       <div className="w-full flex justify-center">
         <div className="w-48 h-48 rounded-full bg-[#fff4f3] flex items-center justify-center">
-          {renderImageByCongestion(crowded)}
+          {renderImageByCongestion(congestion)}
         </div>
       </div>
 
@@ -70,7 +72,9 @@ const Waiting = () => {
       <div className="mt-8 border border-stone-200 rounded-xl py-4 px-6 flex justify-between text-center text-sm">
         <div className="flex-1">
           <p className="text-stone-400 mb-1">현재 혼잡도</p>
-          <p className={`font-bold ${statusColorMap[crowded]}`}>{crowded}</p>
+          <p className={`font-bold ${statusColorMap[congestion]}`}>
+            {congestion}
+          </p>
         </div>
         <div className="flex-1">
           <p className="text-stone-400 mb-1">대기 시간</p>

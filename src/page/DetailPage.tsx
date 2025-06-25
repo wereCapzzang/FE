@@ -2,9 +2,24 @@ import { useNavigate } from 'react-router-dom';
 import Waiting from '../components/detail/Waiting';
 import Heatmap from '../components/detail/Heatmap';
 import Chart from '../components/detail/Chart';
+import { useParams } from 'react-router-dom';
+import useGetRestaurant from '../hooks/useGetRestaurant';
 
 const DetailPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const restaurantId = parseInt(id || '', 10);
+  const { restaurant, loading, error } = useGetRestaurant(restaurantId);
+
+  //TODO: maxPeople 저장 후 파람으로 넘기기 List클릭시
+  const maxPeople = 200;
+  const congestion = '혼잡';
+  const waitTime = 20;
+
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{String(error)}</div>;
+  if (!restaurant) return <div>레스토랑 정보 없음</div>;
+
   //API로 조회하기
   const name = '학생회관 식당';
   return (
@@ -21,7 +36,11 @@ const DetailPage = () => {
         </div>
       </header>
 
-      <Waiting />
+      <Waiting
+        maxPeople={maxPeople}
+        congestion={congestion}
+        waitTime={waitTime}
+      />
 
       <Heatmap />
 
